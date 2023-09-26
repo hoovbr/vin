@@ -2,7 +2,7 @@
 
 class VIN
   class Config
-    # Expressed in milliseconds
+    # Expressed in milliseconds.
     attr_reader :custom_epoch
 
     # For instance, 40 bits gives us 1099511627776 milliseconds, or 34.8 years. Enough time to last us until 2057, enough time for any of us to retire.
@@ -82,8 +82,8 @@ class VIN
 
     def fetch_allowed_range!
       range = Range.new(
-        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MIN").to_i,
-        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MAX").to_i,
+        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MIN", logical_shard_id_allowed_range.min).to_i,
+        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MAX", logical_shard_id_allowed_range.max).to_i,
       )
       unless (logical_shard_id_allowed_range.to_a & range.to_a) == range.to_a
         raise ArgumentError, "VIN_LOGICAL_SHARD_ID_RANGE_MIN and VIN_LOGICAL_SHARD_ID_RANGE_MAX env vars compose a range outside the allowed range of #{logical_shard_id_allowed_range} defined by the number of bits in VIN_LOGICAL_SHARD_ID_BITS env var."
