@@ -36,7 +36,7 @@
   </p>
 </div>
 
-A Redis-powered Ruby client for generating unique, monotonically increasing integer IDs, for use in distributed systems. Based heavily off of [Icicle](https://github.com/intenthq/icicle/), [Twitter Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake), and [Dogtag](https://github.com/zillyinc/dogtag).
+A Redis-powered Ruby client for generating unique, monotonically increasing integer IDs, for use in distributed systems. Based heavily off of [Icicle](https://github.com/intenthq/icicle/), [Twitter Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID), and [Dogtag](https://github.com/zillyinc/dogtag).
 
 # Requirements
 
