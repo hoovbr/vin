@@ -4,12 +4,13 @@ require "spec_helper"
 include DummyData
 
 describe "VIN.generate_id" do
+  subject { instance.generate_id(data_type) }
+
   let(:config) { VIN::Config.new(logical_shard_id_range: logical_shard_id_range) }
   let(:data_type) { random_data_type }
   let(:id) { VIN::Id.new(id: subject, config: config) }
   let(:instance) { VIN.new(config: config) }
   let(:logical_shard_id_range) { random_logical_shard_id_range }
-  subject { instance.generate_id(data_type) }
 
   before do
     VIN::LuaScript.reset_cache

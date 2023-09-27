@@ -31,8 +31,8 @@ describe VIN::Config do
         allow(ENV).to(receive(:fetch).and_call_original)
       end
 
-      it "should not raise and logical_shard_id_range should be equal to logical_shard_id_allowed_range" do
-        expect { subject }.to_not(raise_error)
+      it "does not raise and logical_shard_id_range should be equal to logical_shard_id_allowed_range" do
+        expect { subject }.not_to(raise_error)
         expect(subject.logical_shard_id_range).to(be_a(Range))
         expect(subject.logical_shard_id_range).to(eq(subject.logical_shard_id_allowed_range))
       end

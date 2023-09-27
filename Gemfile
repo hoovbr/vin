@@ -4,8 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "dotenv"
+gem "pry"
 gem "rspec", "~> 3"
 gem "rubocop-rspec", "~> 2"
-gem "pry"
-gem "dotenv"
 gem "simplecov"
