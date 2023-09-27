@@ -20,7 +20,7 @@ task :bump, [:v] do |_t, args|
   version_filename = "lib/vin/version.rb"
   version_file_contents = File.read(version_filename)
   new_version_file_contents = version_file_contents.gsub(/VERSION = "(?:.*)"/, "VERSION = \"#{version}\"")
-  File.open(version_filename, "w") { |file| file.puts new_version_file_contents }
+  File.open(version_filename, "w") { |file| file.puts(new_version_file_contents) }
   sh("bundle install")
   sh("git add #{version_filename} Gemfile.lock")
   sh("git commit -m 'Bump app version to v#{version}.'")
