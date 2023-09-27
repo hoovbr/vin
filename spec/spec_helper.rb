@@ -7,7 +7,7 @@ require "rspec"
 require "simplecov"
 
 # Must be in this particular order
-Dotenv.load(".env.test")
+Dotenv.load("spec/support/.env.test")
 require "vin"
 
 SimpleCov.start
