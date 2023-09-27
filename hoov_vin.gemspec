@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.email = "roger@hoov.com.br"
   s.homepage = "https://github.com/hoovbr/vin"
   s.license = "MIT"
-  s.required_ruby_version = ">= 3.0"
+  s.required_ruby_version = ">= 3.1"
   s.metadata["homepage_uri"] = s.homepage
   s.metadata["source_code_uri"] = "https://github.com/hoovbr/vin"
   s.metadata["changelog_uri"] = "https://github.com/hoovbr/vin/blob/main/CHANGELOG.md"
