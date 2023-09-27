@@ -88,7 +88,7 @@ describe VIN::Timestamp do
     end
   end
 
-  describe ".from_reids" do
+  describe ".from_redis" do
     subject { described_class.from_redis(seconds, microseconds_part) }
 
     let(:seconds) { 7_948_800 }
