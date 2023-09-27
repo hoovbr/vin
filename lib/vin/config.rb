@@ -82,8 +82,8 @@ class VIN
 
     def fetch_allowed_range!
       range = Range.new(
-        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MIN", logical_shard_id_allowed_range.min).to_i,
-        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MAX", logical_shard_id_allowed_range.max).to_i,
+        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MIN", 0).to_i,
+        ENV.fetch("VIN_LOGICAL_SHARD_ID_RANGE_MAX", 0).to_i,
       )
       unless (logical_shard_id_allowed_range.to_a & range.to_a) == range.to_a
         raise ArgumentError, "VIN_LOGICAL_SHARD_ID_RANGE_MIN and VIN_LOGICAL_SHARD_ID_RANGE_MAX env vars compose a range outside the allowed range of #{logical_shard_id_allowed_range} defined by the number of bits in VIN_LOGICAL_SHARD_ID_BITS env var."
