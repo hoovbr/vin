@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe VIN::LuaScript do
+  include DummyData
+
   let(:logical_shard_id_range) { random_logical_shard_id_range }
   let(:config) { VIN::Config.new(logical_shard_id_range: logical_shard_id_range) }
 

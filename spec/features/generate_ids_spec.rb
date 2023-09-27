@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe "VIN.generate_ids" do
+  include DummyData
+
   subject { VIN.new(config: config).generate_ids(data_type, count) }
 
   let(:data_type) { random_data_type }

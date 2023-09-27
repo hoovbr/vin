@@ -7,5 +7,6 @@ gemspec
 gem "dotenv"
 gem "pry"
 gem "rspec", "~> 3"
-gem "rubocop-rspec", "~> 2"
+gem "rubocop-rake"
+gem "rubocop-rspec"
 gem "simplecov"

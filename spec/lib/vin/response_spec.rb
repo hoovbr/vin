@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe VIN::Response do
+  include DummyData
+
   subject { described_class.new(redis_response) }
 
   let(:count) { 1 }

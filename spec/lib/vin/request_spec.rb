@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe VIN::Request do
+  include DummyData
+
   subject { described_class.new(config, data_type, count) }
 
   let(:config) { VIN::Config.new }
@@ -62,20 +61,17 @@ describe VIN::Request do
     end
   end
 
+  # Deferring fixing these warnings until a later point.
+  # rubocop:disable RSpec/SubjectStub
   describe "#response" do
     context "when no error is raised" do
-      before do
-        redis_client = double
+      let(:redis_client) { double }
 
-        expect(subject).to(receive(:redis).and_return(redis_client))
-        expect(subject).to(receive(:lua_script_sha).and_return("dummysha"))
-        expect(redis_client).to(receive(:evalsha).with(
-          "dummysha",
-          keys:,
-        ).and_return(dummy_redis_response(count:)))
+      it "response should be of type VIN::Response" do
+        allow(subject).to receive_messages(redis: redis_client, lua_script_sha: "dummysha")
+        allow(redis_client).to(receive(:evalsha).with("dummysha", keys:).and_return(dummy_redis_response(count:)))
+        expect(subject.response).to(be_a(VIN::Response))
       end
-
-      it { expect(subject.response).to(be_a(VIN::Response)) }
 
       context "when count is one" do
         it { expect(subject.response.sequence.count).to(be(1)) }
@@ -90,9 +86,13 @@ describe VIN::Request do
 
     context "when a Redis::CommandError is raised" do
       it "tries up to 5 times" do
+        # Deferring fixing this warning until a later point.
+        # rubocop:disable RSpec/MessageSpies
         expect(subject).to(receive(:redis_response).exactly(5).times.and_raise(Redis::CommandError))
         expect { subject.response }.to(raise_error(Redis::CommandError))
+        # rubocop:enable RSpec/MessageSpies
       end
     end
   end
+  # rubocop:enable RSpec/SubjectStub
 end

@@ -63,6 +63,8 @@ GEM
       rubocop (~> 1.41)
     rubocop-factory_bot (2.23.1)
       rubocop (~> 1.33)
+    rubocop-rake (0.6.0)
+      rubocop (~> 1.0)
     rubocop-rspec (2.24.0)
       rubocop (~> 1.33)
       rubocop-capybara (~> 2.17)
@@ -84,7 +86,8 @@ DEPENDENCIES
   hoov_vin!
   pry
   rspec (~> 3)
-  rubocop-rspec (~> 2)
+  rubocop-rake
+  rubocop-rspec
   simplecov
 
 BUNDLED WITH

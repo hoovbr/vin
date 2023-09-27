@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe "VIN.generate_id" do
+  include DummyData
+
   subject { instance.generate_id(data_type) }
 
   let(:config) { VIN::Config.new(logical_shard_id_range: logical_shard_id_range) }

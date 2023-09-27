@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe VIN::Id do
+  include DummyData
+
   subject { described_class.new(id:, config:) }
 
   let(:config) { VIN::Config.new }

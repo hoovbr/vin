@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 describe VIN::Timestamp do
   subject { described_class.new(milliseconds, epoch:) }
 
