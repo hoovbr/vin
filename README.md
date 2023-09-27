@@ -248,7 +248,7 @@ In Rails, when you create a new record, the `create` method is called on the mod
 
 ## What about the performance?
 
-Compared to the benefits of having VINs, the performance impact is negligible. The only performance impact is the time it takes to generate the VIN, which is around ~0.039ms.
+Compared to the benefits of having VINs, the performance impact is negligible. The only performance impact is the time it takes to generate the VIN, which is around ~0.039ms (yes, that's not a typo, it's less than 1/25th of a millisecond).
 
 ## Any issues I should be aware of?
 
