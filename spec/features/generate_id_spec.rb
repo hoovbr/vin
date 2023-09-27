@@ -20,8 +20,26 @@ describe "VIN.generate_id" do
     expect(subject).to(be_a(Numeric))
   end
 
-  it "increases with each call" do
-    expect(subject).to(be < instance.generate_id(data_type))
+  context "when generating IDs from one server" do
+    let(:logical_shard_id_range) { 0..0 }
+
+    it "increases with each call" do
+      expect(subject).to(be < instance.generate_id(data_type))
+    end
+
+    context "when two IDs are generated within the same millisecond" do
+      # We tried using `let(:response) { generator.send(:response) }` but that was causing other unintentional side effects, so using `allow_any_instance_of` was simpler.
+      # rubocop:disable RSpec/AnyInstance
+      before { allow_any_instance_of(VIN::Response).to(receive_messages(seconds: 123_123_123, microseconds_part: 123)) }
+      # rubocop:enable RSpec/AnyInstance
+
+      it "increases the sequence number" do
+        first_id = VIN::Id.new(id: instance.generate_id(data_type), config: config)
+        second_id = VIN::Id.new(id: instance.generate_id(data_type), config: config)
+        expect(first_id.timestamp.milliseconds).to(eql(second_id.timestamp.milliseconds))
+        expect(first_id.sequence).to(be < second_id.sequence)
+      end
+    end
   end
 
   it "contains a current timestamp" do
