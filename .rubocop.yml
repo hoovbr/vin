@@ -195,3 +195,9 @@ Style/MethodCallWithArgsParentheses:
   IgnoredMethods:
     - to
     - not_to
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
