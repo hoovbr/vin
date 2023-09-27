@@ -97,12 +97,12 @@ class YourApp
     …
     # CAUTION: Avoid modifying the values below without fully understanding the implications in past IDs.
     config.id_generator = VIN.new(config: VIN::Config.new(
-      custom_epoch: 1_672_531_200_000, # Jan 1st, 2023, 12:00 AM UTC
-      timestamp_bits: 40, # 40 bits gives us 1099511627776 milliseconds, or 34.8 years, enough time for any of us to retire.
-      logical_shard_id_bits: 3, # 3 bits gives us 8 logical shards, which means we can have 8 different servers generating ids.
-      data_type_bits: 9, # 9 bits gives us 512 different data types.
-      sequence_bits: 11, # 11 bits gives us 2048 ids per millisecond per logical shard.
-      logical_shard_id_range: 0..7, # 8 logical shards, numbered 0 through 7.
+      custom_epoch: 1_672_531_200_000,
+      timestamp_bits: 40,
+      logical_shard_id_bits: 3,
+      data_type_bits: 9,
+      sequence_bits: 11,
+      logical_shard_id_range: 0..0,
     ))
   end
 end
