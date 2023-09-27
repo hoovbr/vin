@@ -246,7 +246,11 @@ This is then converted to a decimal number, which is what we use as the ID. The 
 
 In Rails, when you create a new record, the `create` method is called on the model class, which creates the record in memory and then calls `save` on it. The `save` method will either call `create` or `update` depending on whether the record is new or not. If the record is not new, it will already have an ID assigned to it, in which case our method `set_vin_if_needed` in `HasVin` won't do anything. However, if the record is new, it will not have an ID assigned to it, in which case our method will generate and assign a VIN to it. This happens before the record gets sent to the database, so the database will not generate an ID for it.
 
-### Any issues I should be aware of?
+## What about the performance?
+
+Compared to the benefits of having VINs, the performance impact is negligible. The only performance impact is the time it takes to generate the VIN, which is around ~0.039ms.
+
+## Any issues I should be aware of?
 
 Be careful of using VIN IDs with JavaScript, since it [doesn't handle 64 bit integers well](http://stackoverflow.com/questions/9643626/javascript-cant-handle-64-bit-integers-can-it). You'll probably want to work with them as strings.
 
