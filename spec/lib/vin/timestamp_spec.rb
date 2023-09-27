@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 describe VIN::Timestamp do
   subject { described_class.new(milliseconds, epoch:) }
 
@@ -88,7 +86,7 @@ describe VIN::Timestamp do
     end
   end
 
-  describe ".from_reids" do
+  describe ".from_redis" do
     subject { described_class.from_redis(seconds, microseconds_part) }
 
     let(:seconds) { 7_948_800 }

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-include DummyData
-
 describe VIN::Generator do
+  include DummyData
+
   subject { described_class.new(config: config).generate_ids(data_type, count) }
 
   let(:config) { VIN::Config.new }
@@ -57,7 +56,10 @@ describe VIN::Generator do
 
     context "when arguments are valid" do
       before do
-        expect_any_instance_of(VIN::Request).to(receive(:response).and_return(response))
+        # The generator's request is not exposed as an instance variable, so we just stub any instance of it.
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(VIN::Request).to(receive(:response).and_return(response))
+        # rubocop:enable RSpec/AnyInstance
       end
 
       context "when count is 1" do
