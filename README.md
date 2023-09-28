@@ -164,25 +164,28 @@ This will make sure the `HasVin` module is included in all your models.
 
 >_**Note:** If you already have an existing codebase and database records, make sure you write the appropriate migration to change the primary key type to `:bigint` across the board, as well as migrate your existing records' IDs to VIN IDs._
 
-## Usage outside of ActiveRecord
+## Usage outside of ActiveRecord/Rails context
 
 ```ruby
 vin = VIN.new
 data_type = 0
-vin.generate_id(data_type)
-…
+vin.generate_id(data_type) # => 63801071700541441
+```
+
+```ruby
 count = 100
-vin.generate_ids(data_type, count)
-…
-id_number = vin.generate_id(data_type)
-id = VIN::Id.new(id_number)
-id.data_type #=> 42
-id.sequence #=> 1
-id.logical_shard_id #=> 0
-id.custom_timestamp # time since custom epoch
-id.timestamp.to_i #=> 28146773761 # Unix timestamp
-id.timestamp.to_time # Ruby Time object
-id.timestamp.epoch #=> 1646160000000
+vin.generate_ids(data_type, count) # => [63801199693922306, 63801199693922307, … 98 other IDs … ]
+```
+
+```ruby
+id_number = vin.generate_id(data_type) # => 63801532235120742
+id = VIN::Id.new(id: id_number) # => #<VIN::Id:0x0000000108452ff0…>
+id.data_type # => 0
+id.sequence # => 102
+id.logical_shard_id # => 0
+id.custom_timestamp # => 7605735330, time since custom epoc in milliseconds
+id.timestamp.to_time # 2023-09-27 22:16:15.33 -0300 (Ruby Time object)
+id.timestamp.epoch #=> 1688258040000, time since UNIX epoch in milliseconds
 ```
 
 # Configuration
