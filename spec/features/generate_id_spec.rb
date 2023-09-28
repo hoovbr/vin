@@ -34,7 +34,6 @@ describe "VIN.generate_id" do
   before do
     allow(generator).to(receive(:response).and_return(first_stub_response, second_stub_response))
     VIN::LuaScript.reset_cache
-    VIN::Request.reset_cache
   end
 
   it "returns a new ID" do

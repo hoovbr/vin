@@ -20,7 +20,6 @@ describe "VIN.generate_ids" do
   before do
     allow(generator).to(receive(:response).and_return(stub_response))
     VIN::LuaScript.reset_cache
-    VIN::Request.reset_cache
   end
 
   it "returns new IDs" do
