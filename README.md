@@ -28,7 +28,7 @@
   <img src="https://views.whatilearened.today/views/github/hoovbr/vin.svg">
 
   <p align="center">
-    <a href="#preview">View Demo</a>
+    <a href="#demo">View Demo</a>
     ·
     <a href="https://github.com/hoovbr/vin/issues/new/choose">Report Bug</a>
     ·
