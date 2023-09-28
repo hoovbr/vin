@@ -226,7 +226,7 @@ At this point you can probably guess why we created VINs. They are the best at s
 - VINs are 64-bit integers, making them more space-efficient than UUIDs and ULIDs, which take 128 bits at best.
 - VINs can be sorted, earning a chronologically sorted list, thanks to the monotonically-increasing nature of the IDs.
 - VINs encode additional context and meaning to the data it stores, such as the timestamp, data type, and shard ID, which can be used to identify the source of the data, optimizing distributed systems and debugging.
-- VINs are fully customizable. As you could see in the [configuration](#configuration) section, you can customize the number of bits used for each component of the VIN, allowing you to optimize the VIN for your specific use case.
+- VINs are fully customizable. As you could see in the [Configuration](#configuration) section, you can customize the number of bits used for each component of the VIN, allowing you to optimize the VIN for your specific use case.
 
 ## How does it work?
 
@@ -234,7 +234,7 @@ At this point you can probably guess why we created VINs. They are the best at s
 
 The IDs are composed by 64 bits, which are divided into 4 components: timestamp, shard ID (aka machine ID), data type, and sequence. It's important that it starts with the timestamp component, as that's what guarantees the IDs are sortable by time.
 
-The number of bits that each of these components take up can be customized as seen in the [configuration](#configuration), but for the sake of this example, we'll use 40 bits for the timestamp, 3 bits for the shard ID, 9 bits for the data type, and 11 bits for the sequence. This adds up 63 bits, but since we're working with a signed integer, the first bit is reserved for the bit sign. This results in this binary representation:
+The number of bits that each of these components take up can be customized as seen in the [Configuration](#configuration), but for the sake of this example, we'll use 40 bits for the timestamp, 3 bits for the shard ID, 9 bits for the data type, and 11 bits for the sequence. This adds up 63 bits, but since we're working with a signed integer, the first bit is reserved for the bit sign. This results in this binary representation:
 
 ```no-highlight
 +----------------------+----------+--------------+----------------+
