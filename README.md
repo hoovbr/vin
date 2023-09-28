@@ -5,8 +5,8 @@
     <img width=200>
   </picture>
   <h1>VIN</h1>
-  <p>noun ‧ Versatile Identification Number</p>
-  <p><strong>Generate unique monotonically increasing integer IDs. Designed for scalable distributed systems.</strong></p>
+  <p><i>noun ‧ <strong>V</strong>ersatile <strong>I</strong>dentification <strong>N</strong>umber</i></p>
+  <p><strong>A customizable Redis-powered Ruby client for generating unique, monotonically-increasing integer IDs, for use in distributed systems and databases.</strong></p>
   <a href="https://github.com/hoovbr/vin/releases">
     <img alt="Latest Release" src="https://img.shields.io/github/v/release/hoovbr/vin?sort=semver">
   </a>
@@ -36,7 +36,7 @@
   </p>
 </div>
 
-A Redis-powered Ruby client for generating unique, monotonically increasing integer IDs, for use in distributed systems. Based heavily off of [Icicle](https://github.com/intenthq/icicle/), [Twitter Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID), and [Dogtag](https://github.com/zillyinc/dogtag).
+A customizable Redis-powered Ruby client for generating unique, monotonically-increasing integer IDs, for use in distributed systems and databases. Based heavily off of [Icicle](https://github.com/intenthq/icicle/), [Twitter Snowflake](https://en.wikipedia.org/wiki/Snowflake_ID), and [Dogtag](https://github.com/zillyinc/dogtag).
 
 # Requirements
 
@@ -221,7 +221,7 @@ At this point you can probably guess why we created VINs. They are the best at s
 - VINs has zero collision probability, making them universally unique across the entire database.
     - This comes with the drawback of a self-imposed bottleneck on the generation. However, this is only an issue at absurd scales (thousands of record creations per milisecond, per server), and can be easily overcome by increasing the number of sequence bits or shards.
 - VINs are 64-bit integers, making them more space-efficient than UUIDs and ULIDs, which take 128 bits at best.
-- VINs can be sorted, earning a chronologically sorted list, thanks to the monotonically increasing nature of the IDs.
+- VINs can be sorted, earning a chronologically sorted list, thanks to the monotonically-increasing nature of the IDs.
 - VINs encode additional context and meaning to the data it stores, such as the timestamp, data type, and shard ID, which can be used to identify the source of the data, optimizing distributed systems and debugging.
 - VINs are fully customizable. As you could see in the [configuration](#configuration) section, you can customize the number of bits used for each component of the VIN, allowing you to optimize the VIN for your specific use case.
 
