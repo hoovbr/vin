@@ -10,6 +10,9 @@ describe VIN::Request do
   let(:count) { 1 }
   let(:lua_script) { 'return "Hello World!"' }
   let(:keys) { [data_type, count] }
+  let(:stub_response) do
+    VIN::Response.new(dummy_redis_response(count: count))
+  end
 
   describe ".new" do
     context "when data_type is not a number" do
@@ -66,6 +69,10 @@ describe VIN::Request do
   describe "#response" do
     context "when no error is raised" do
       let(:redis_client) { double }
+
+      before do
+        allow(subject).to(receive(:response).and_return(stub_response))
+      end
 
       it "response should be of type VIN::Response" do
         allow(subject).to receive_messages(redis: redis_client, lua_script_sha: "dummysha")
