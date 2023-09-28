@@ -52,7 +52,7 @@ A customizable Redis-powered Ruby client for generating unique, monotonically-in
 The gif below demonstrates how the ID generation works:
 
 <div align="center">
-  <img src="docs/demo.gif">
+  <img alt="Demo" src="https://github.com/hoovbr/vin/assets/8419048/dc9fe71f-7d6d-4ba5-bd8e-fe81a280928a">
 </div>
 
 </p>
