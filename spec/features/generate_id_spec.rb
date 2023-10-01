@@ -10,10 +10,30 @@ describe "VIN.generate_id" do
   let(:id) { VIN::Id.new(id: subject, config: config) }
   let(:instance) { VIN.new(config: config) }
   let(:logical_shard_id_range) { random_logical_shard_id_range }
+  let(:generator) { instance.send(:generator) }
+  let(:now) { Time.now }
+  let(:first_stub_response) do
+    VIN::Response.new(
+      dummy_redis_response(
+        sequence_start: 123,
+        logical_shard_id: logical_shard_id_range.min,
+        now: now,
+      ),
+    )
+  end
+  let(:second_stub_response) do
+    VIN::Response.new(
+      dummy_redis_response(
+        sequence_start: 124,
+        logical_shard_id: logical_shard_id_range.min,
+        now: now,
+      ),
+    )
+  end
 
   before do
+    allow(generator).to(receive(:response).and_return(first_stub_response, second_stub_response))
     VIN::LuaScript.reset_cache
-    VIN::Request.reset_cache
   end
 
   it "returns a new ID" do
@@ -28,11 +48,6 @@ describe "VIN.generate_id" do
     end
 
     context "when two IDs are generated within the same millisecond" do
-      # We tried using `let(:response) { generator.send(:response) }` but that was causing other unintentional side effects, so using `allow_any_instance_of` was simpler.
-      # rubocop:disable RSpec/AnyInstance
-      before { allow_any_instance_of(VIN::Response).to(receive_messages(seconds: 123_123_123, microseconds_part: 123)) }
-      # rubocop:enable RSpec/AnyInstance
-
       it "increases the sequence number" do
         first_id = VIN::Id.new(id: instance.generate_id(data_type), config: config)
         second_id = VIN::Id.new(id: instance.generate_id(data_type), config: config)
@@ -79,7 +94,13 @@ describe "VIN.generate_id" do
   end
 
   context "when the Redis server has more than one logical shard ID" do
-    subject { 10.times.map { VIN::Id.new(id: instance.generate_id(data_type), config: config) } }
+    subject do
+      10.times.map do |i|
+        expected_response = VIN::Response.new(dummy_redis_response(logical_shard_id: (i % 2) + 1))
+        allow(generator).to(receive(:response).and_return(expected_response))
+        VIN::Id.new(id: instance.generate_id(data_type), config: config)
+      end
+    end
 
     let(:logical_shard_id_range) { 1..2 }
 

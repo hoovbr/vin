@@ -3,16 +3,23 @@
 describe "VIN.generate_ids" do
   include DummyData
 
-  subject { VIN.new(config: config).generate_ids(data_type, count) }
+  subject { instance.generate_ids(data_type, count) }
 
+  let(:instance) { VIN.new(config: config) }
   let(:data_type) { random_data_type }
   let(:count) { 3 }
   let(:config) { VIN::Config.new }
   let(:ids) { subject.map { |id| VIN::Id.new(id:, config:) } }
+  let(:generator) { instance.send(:generator) }
+  let(:logical_shard_id_range) { random_logical_shard_id_range }
+  let(:logical_shard_id) { logical_shard_id_range.min }
+  let(:stub_response) do
+    VIN::Response.new(dummy_redis_response(logical_shard_id: logical_shard_id))
+  end
 
   before do
+    allow(generator).to(receive(:response).and_return(stub_response))
     VIN::LuaScript.reset_cache
-    VIN::Request.reset_cache
   end
 
   it "returns new IDs" do

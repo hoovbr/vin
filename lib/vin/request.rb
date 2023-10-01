@@ -26,11 +26,6 @@ class VIN
       Response.new(try_redis_response)
     end
 
-    # Used in tests to ensure that the file is regenerated.
-    def self.reset_cache
-      @@lua_script_sha = nil
-    end
-
     private
 
     def lua_script_sha

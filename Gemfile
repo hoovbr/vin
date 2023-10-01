@@ -4,9 +4,12 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "dotenv"
+gem "dotenv", group: :test
 gem "pry"
-gem "rspec", "~> 3"
+gem "rake"
+gem "rspec", group: :test
+gem "rubocop"
 gem "rubocop-rake"
-gem "rubocop-rspec"
-gem "simplecov"
+gem "rubocop-rspec", group: :test
+gem "simplecov", require: false, group: :test
+gem "tty-prompt"
