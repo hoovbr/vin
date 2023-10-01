@@ -76,7 +76,7 @@ Follow the steps below to get started with VIN in your Ruby on Rails project. Th
 
 To achieve this, create or update your `config/initializers/generators.rb` file:
 
-```
+```ruby
 Rails.application.config.generators do |g|
   g.orm :active_record, primary_key_type: :bigint
 end
