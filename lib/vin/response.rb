@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class VIN
   class Response
     START_SEQUENCE_INDEX = 0

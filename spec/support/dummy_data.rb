@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module DummyData
   def dummy_config
     @dummy_config ||= VIN::Config.new

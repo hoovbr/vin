@@ -1,14 +1,12 @@
-# frozen_string_literal: true
-
 class VIN
   class Request
     include VIN::Mixins::Redis
 
     MAX_TRIES = 5
 
-    attr_reader :data_type, :count, :config
+    attr_reader :data_type, :count, :config, :custom_timestamp
 
-    def initialize(config, data_type, count = 1)
+    def initialize(config, data_type, count = 1, custom_timestamp: nil)
       raise(ArgumentError, "data_type must be a number") unless data_type.is_a?(Numeric)
       unless config.data_type_allowed_range.include?(data_type)
         raise(ArgumentError, "data_type is outside the allowed range of #{config.data_type_allowed_range}")
@@ -20,6 +18,7 @@ class VIN
       @data_type = data_type
       @count = count
       @config = config
+      @custom_timestamp = custom_timestamp
     end
 
     def response
@@ -33,7 +32,7 @@ class VIN
     end
 
     def lua_keys
-      @lua_keys ||= [data_type, count]
+      @lua_keys ||= [data_type, count, custom_timestamp].compact
     end
 
     # NOTE: If too many requests come in inside of a millisecond the Lua script

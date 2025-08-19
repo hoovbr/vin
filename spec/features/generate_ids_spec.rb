@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe "VIN.generate_ids" do
   include DummyData
 
@@ -34,7 +32,7 @@ describe "VIN.generate_ids" do
   it "contains a current timestamp" do
     expect(ids.map(&:timestamp)).to(all(be_a(VIN::Timestamp)))
     expect(ids.map(&:custom_timestamp)).to(all(be_between(0, ~(-1 << config.timestamp_bits))))
-    expect(ids.map(&:timestamp).map(&:to_time)).to(all(be_between((Time.now - 1), (Time.now + 1))))
+    expect(ids.map(&:timestamp).map(&:to_time)).to(all(be_between(Time.now - 1, Time.now + 1)))
   end
 
   context "when logical_shard_id_range is a range" do

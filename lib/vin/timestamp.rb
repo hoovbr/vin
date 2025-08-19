@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class VIN
   class Timestamp
     ONE_SECOND_IN_MILLIS = 1_000

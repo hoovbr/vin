@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe VIN::Generator do
   include DummyData
 
@@ -22,6 +20,32 @@ describe VIN::Generator do
   let(:response) { VIN::Response.new(redis_response) }
 
   describe "#generate_ids" do
+    context "with custom timestamp" do
+      let(:custom_timestamp) { config.custom_epoch + 86_400_000 } # 1 day after custom epoch
+      let(:generator) { described_class.new(config: config) }
+
+      context "when timestamp is valid" do
+        let(:request_double) { instance_double(VIN::Request) }
+
+        before do
+          allow(VIN::Request).to receive(:new).with(config, data_type, count, custom_timestamp: custom_timestamp).and_return(request_double)
+          allow(request_double).to receive(:response).and_return(response)
+        end
+
+        it "validates timestamp is an integer" do
+          expect do
+            generator.generate_ids(data_type, count, timestamp: "not_a_number")
+          end.to raise_error(ArgumentError, /timestamp must be an integer/)
+        end
+
+        it "validates timestamp is not before custom epoch" do
+          expect do
+            generator.generate_ids(data_type, count, timestamp: config.custom_epoch - 1000)
+          end.to raise_error(ArgumentError, /timestamp cannot be before the custom epoch/)
+        end
+      end
+    end
+
     context "when arguments are invalid" do
       context "when data_type is not an integer" do
         let(:data_type) { "foo" }
@@ -55,11 +79,11 @@ describe VIN::Generator do
     end
 
     context "when arguments are valid" do
+      let(:request_double) { instance_double(VIN::Request) }
+
       before do
-        # The generator's request is not exposed as an instance variable, so we just stub any instance of it.
-        # rubocop:disable RSpec/AnyInstance
-        allow_any_instance_of(VIN::Request).to(receive(:response).and_return(response))
-        # rubocop:enable RSpec/AnyInstance
+        allow(VIN::Request).to receive(:new).and_return(request_double)
+        allow(request_double).to receive(:response).and_return(response)
       end
 
       context "when count is 1" do

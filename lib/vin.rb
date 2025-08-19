@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "redis"
 require "vin/mixins/redis"
 
@@ -10,17 +8,17 @@ class VIN
     @config = config || VIN::Config.new
   end
 
-  def generate_id(data_type)
-    generator.generate_ids(data_type, 1).first
+  def generate_id(data_type, timestamp: nil)
+    generator.generate_ids(data_type, 1, timestamp: timestamp).first
   end
 
-  def generate_ids(data_type, count)
+  def generate_ids(data_type, count, timestamp: nil)
     ids = []
     # The Lua script can't always return as many IDs as you may want. So we loop
     # until we have the exact amount.
     while ids.length < count
       initial_id_count = ids.length
-      ids += generator.generate_ids(data_type, count - ids.length)
+      ids += generator.generate_ids(data_type, count - ids.length, timestamp: timestamp)
       # Ensure the ids array keeps growing as infinite loop insurance
       return ids unless ids.length > initial_id_count
     end
