@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe VIN::Response do
   include DummyData
 

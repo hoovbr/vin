@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe VIN::Config do
   subject { described_class.new }
 

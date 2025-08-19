@@ -1,11 +1,9 @@
-# frozen_string_literal: true
-
 require "erb"
 require "vin/config"
 
 class VIN
   module LuaScript
-    LUA_SCRIPT_PATH = "lua/id-generation.lua.erb"
+    LUA_SCRIPT_PATH = "lua/id-generation.lua.erb".freeze
 
     def self.generate_file(config: nil)
       config ||= VIN::Config.new

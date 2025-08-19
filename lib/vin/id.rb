@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class VIN
   class Id
     attr_reader :id, :config

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe VIN::LuaScript do
   include DummyData
 
