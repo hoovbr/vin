@@ -16,7 +16,11 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - uses: paambaati/codeclimate-action@v4.0.0
+
+    - name: Run tests & linter
+      run: bundle exec rake
+
+    - uses: qltysh/qlty-action/coverage@v2
       with:
-        coverageCommand: bundle exec rake
-        debug: true
+        token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        files: ./coverage/.resultset.json
