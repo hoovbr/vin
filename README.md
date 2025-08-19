@@ -10,11 +10,11 @@
   <a href="https://github.com/hoovbr/vin/releases">
     <img alt="Latest Release" src="https://img.shields.io/github/v/release/hoovbr/vin?sort=semver">
   </a>
-  <a href="https://codeclimate.com/github/hoovbr/vin/maintainability">
-    <img src="https://api.codeclimate.com/v1/badges/790449fb5d05f6a134a5/maintainability" />
+  <a href="https://qlty.sh/gh/hoovbr/projects/vin">
+    <img src="https://qlty.sh/gh/hoovbr/projects/vin/maintainability.svg" alt="Maintainability" />
   </a>
-  <a href="https://codeclimate.com/github/hoovbr/vin/test_coverage">
-    <img src="https://api.codeclimate.com/v1/badges/790449fb5d05f6a134a5/test_coverage" />
+  <a href="https://qlty.sh/gh/hoovbr/projects/vin">
+    <img src="https://qlty.sh/gh/hoovbr/projects/vin/coverage.svg" alt="Code Coverage" />
   </a>
   <a href="https://github.com/hoovbr/vin/actions/workflows/push.yml">
     <img alt="Tests & Linter" src="https://github.com/hoovbr/vin/actions/workflows/push.yml/badge.svg">
