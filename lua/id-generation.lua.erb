@@ -3,6 +3,7 @@ local max_sequence = <%= config.max_sequence %>
 
 local data_type = tonumber(KEYS[1])
 local num_ids = tonumber(KEYS[2])
+local custom_timestamp = tonumber(KEYS[3]) -- Optional custom timestamp in Unix milliseconds (absolute time)
 
 -- Allow one server to acts as multiple shards
 local logical_shard_id_min = <%= config.logical_shard_id_range.min %>
@@ -72,12 +73,21 @@ outcome of the writes.
 
 See the "Scripts as pure functions" section at http://redis.io/commands/eval for more information.
 --]]
-local time = redis.call('TIME')
+local seconds, microseconds
+if custom_timestamp then
+  -- Custom timestamp is already in Unix milliseconds (absolute time)
+  seconds = math.floor(custom_timestamp / 1000)
+  microseconds = (custom_timestamp % 1000) * 1000
+else
+  local time = redis.call('TIME')
+  seconds = tonumber(time[1])
+  microseconds = tonumber(time[2])
+end
 
 return {
   start_sequence,
   end_sequence, -- Doesn't need conversion, the result of INCR or the variable set is always a number.
   logical_shard_id,
-  tonumber(time[1]),
-  tonumber(time[2])
+  seconds,
+  microseconds
 }
