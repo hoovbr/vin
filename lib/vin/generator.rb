@@ -27,6 +27,15 @@ class VIN
       raise(ArgumentError, "timestamps array cannot be empty") if timestamps.empty?
 
       timestamps.each { |ts| validate_timestamp!(ts) }
+      
+      # Check for potential duplicate ID issue
+      timestamp_counts = timestamps.tally
+      max_count = timestamp_counts.values.max
+      if max_count > config.max_sequence
+        raise ArgumentError, "Cannot generate #{max_count} IDs for the same timestamp. " \
+                            "Maximum allowed is #{config.max_sequence} (2^#{config.sequence_bits} - 1). " \
+                            "Requesting more would produce duplicate IDs."
+      end
 
       generate_ids_for_multiple_timestamps(data_type, timestamps)
     end
