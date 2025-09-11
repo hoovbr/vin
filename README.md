@@ -178,7 +178,7 @@ vin.generate_ids(data_type, count) # => [63801199693922306, 63801199693922307, â
 ```
 
 ```ruby
-# Generate IDs with custom timestamps
+# Generate IDs with custom timestamps (e.g. for back-porting legacy systems, passing your db's created_at timestamps)
 timestamps = [1646160000000, 1646160001000, 1646160002000] # Unix milliseconds
 vin.generate_ids_from_timestamps(data_type, timestamps: timestamps)
 # => [id_with_timestamp1, id_with_timestamp2, id_with_timestamp3]
