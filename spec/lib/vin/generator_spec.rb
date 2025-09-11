@@ -169,14 +169,14 @@ describe VIN::Generator do
         result = generator.generate_ids_from_timestamps(data_type, timestamps: timestamps_shuffled)
 
         expect(result.length).to eq(3)
-        
+
         # Results should be in the order of input timestamps
         # Verify each ID has the timestamp corresponding to its position
         vin_ids = result.map { |id| VIN::Id.new(id: id, config: config) }
-        
+
         # First ID should have three_days_after_epoch
         expect(vin_ids[0].timestamp.milliseconds).to eq(three_days_after_epoch - config.custom_epoch)
-        # Second ID should have one_day_after_epoch  
+        # Second ID should have one_day_after_epoch
         expect(vin_ids[1].timestamp.milliseconds).to eq(one_day_after_epoch - config.custom_epoch)
         # Third ID should have two_days_after_epoch
         expect(vin_ids[2].timestamp.milliseconds).to eq(two_days_after_epoch - config.custom_epoch)
@@ -242,7 +242,7 @@ describe VIN::Generator do
         # Create an array with more than max_sequence identical timestamps
         # Default max_sequence is 2047 (2^11 - 1)
         identical_timestamps = [one_day_after_epoch] * (config.max_sequence + 1)
-        
+
         expect do
           generator.generate_ids_from_timestamps(data_type, timestamps: identical_timestamps)
         end.to raise_error(ArgumentError, /Cannot generate 2048 IDs for the same timestamp.*Maximum allowed is 2047/)
@@ -251,19 +251,18 @@ describe VIN::Generator do
       it "allows exactly max_sequence identical timestamps" do
         # This should work fine - exactly at the limit
         identical_timestamps = [one_day_after_epoch] * config.max_sequence
-        
+
         # Mock the request/response to avoid actual Redis calls
         request_double = instance_double(VIN::Request)
-        response_double = instance_double(VIN::Response, 
-          sequence: (0...config.max_sequence).to_a,
-          logical_shard_id: 1,
-          seconds: 1234567890,
-          microseconds_part: 123456
-        )
-        
+        response_double = instance_double(VIN::Response,
+                                          sequence: (0...config.max_sequence).to_a,
+                                          logical_shard_id: 1,
+                                          seconds: 1_234_567_890,
+                                          microseconds_part: 123_456,)
+
         allow(VIN::Request).to receive(:new).and_return(request_double)
         allow(request_double).to receive(:response).and_return(response_double)
-        
+
         expect do
           generator.generate_ids_from_timestamps(data_type, timestamps: identical_timestamps)
         end.not_to raise_error
