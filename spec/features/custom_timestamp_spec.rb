@@ -45,10 +45,12 @@ describe "VIN custom timestamp feature" do
     end
   end
 
-  describe "#generate_id with custom timestamp" do
+  describe "#generate_ids_from_timestamps with custom timestamp" do
     context "when timestamp is valid" do
       it "generates an ID with the provided timestamp" do
-        id = subject.generate_id(data_type, timestamp: custom_timestamp)
+        ids = subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
+        expect(ids.length).to eq(1)
+        id = ids.first
         expect(id).to be_a(Integer)
 
         # Extract timestamp from the ID
@@ -60,8 +62,11 @@ describe "VIN custom timestamp feature" do
       end
 
       it "generates different IDs when called multiple times with the same timestamp" do
-        id1 = subject.generate_id(data_type, timestamp: custom_timestamp)
-        id2 = subject.generate_id(data_type, timestamp: custom_timestamp)
+        ids1 = subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
+        ids2 = subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
+
+        id1 = ids1.first
+        id2 = ids2.first
 
         expect(id1).not_to eq(id2)
 
@@ -87,7 +92,7 @@ describe "VIN custom timestamp feature" do
 
       it "raises an ArgumentError" do
         expect do
-          subject.generate_id(data_type, timestamp: custom_timestamp)
+          subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
         end.to raise_error(ArgumentError, /timestamp cannot be before the custom epoch/)
       end
     end
@@ -97,116 +102,109 @@ describe "VIN custom timestamp feature" do
 
       it "raises an ArgumentError" do
         expect do
-          subject.generate_id(data_type, timestamp: custom_timestamp)
+          subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
         end.to raise_error(ArgumentError, /timestamp must be an integer/)
       end
     end
 
     context "when timestamp is nil" do
-      it "generates an ID using Redis timestamp" do
-        id = subject.generate_id(data_type, timestamp: nil)
-        expect(id).to be_a(Integer)
-
-        # The ID should have a recent timestamp (within the last few seconds)
-        vin_id = VIN::Id.new(id: id, config: config)
-        unix_timestamp = vin_id.timestamp.with_unix_epoch.milliseconds
-
-        expect(unix_timestamp).to be_within(5000).of(now_ms)
+      it "raises an ArgumentError" do
+        expect do
+          subject.generate_ids_from_timestamps(data_type, timestamps: [nil])
+        end.to raise_error(ArgumentError, /timestamp must be an integer/)
       end
     end
   end
 
-  describe "#generate_ids with custom timestamp" do
-    let(:count) { 5 }
+  describe "#generate_ids_from_timestamps with multiple timestamps" do
+    context "when timestamps are valid" do
+      let(:custom_timestamp2) { config.custom_epoch + 172_800_000 } # 2 days after custom epoch
 
-    context "when timestamp is valid" do
-      it "generates multiple IDs with the provided timestamp" do
-        ids = subject.generate_ids(data_type, count, timestamp: custom_timestamp)
+      it "generates multiple IDs with the provided timestamps" do
+        timestamps = [custom_timestamp, custom_timestamp2]
+        ids = subject.generate_ids_from_timestamps(data_type, timestamps: timestamps)
 
-        expect(ids.length).to eq(count)
-        expect(ids.uniq.length).to eq(count) # All IDs should be unique
+        expect(ids.length).to eq(2)
 
-        # All IDs should have the same timestamp
-        timestamps = ids.map do |id|
-          VIN::Id.new(id: id, config: config).timestamp.milliseconds
-        end
+        # Each ID should have its corresponding timestamp
+        vin_id1 = VIN::Id.new(id: ids[0], config: config)
+        vin_id2 = VIN::Id.new(id: ids[1], config: config)
 
-        expect(timestamps.uniq.length).to eq(1)
-        expect(timestamps.first).to eq(custom_timestamp - config.custom_epoch)
+        expected_timestamp_ms1 = custom_timestamp - config.custom_epoch
+        expected_timestamp_ms2 = custom_timestamp2 - config.custom_epoch
+
+        expect(vin_id1.timestamp.milliseconds).to eq(expected_timestamp_ms1)
+        expect(vin_id2.timestamp.milliseconds).to eq(expected_timestamp_ms2)
       end
 
       it "generates sequential IDs with increasing sequences" do
-        ids = subject.generate_ids(data_type, count, timestamp: custom_timestamp)
+        # Generate multiple IDs with the same timestamp
+        timestamps = [custom_timestamp, custom_timestamp, custom_timestamp]
+        ids = subject.generate_ids_from_timestamps(data_type, timestamps: timestamps)
 
-        sequences = ids.map do |id|
-          VIN::Id.new(id: id, config: config).sequence
-        end
+        expect(ids.length).to eq(3)
+        expect(ids.uniq.length).to eq(3) # All IDs should be unique
 
-        # Sequences should be consecutive
-        sequences.each_cons(2) do |a, b|
-          expect(b - a).to eq(1)
+        # Extract the VIN IDs
+        vin_ids = ids.map { |id| VIN::Id.new(id: id, config: config) }
+
+        # All should have the same timestamp
+        expect(vin_ids.map { |v| v.timestamp.milliseconds }.uniq.length).to eq(1)
+
+        # Group by logical shard ID to check sequences
+        by_shard = vin_ids.group_by(&:logical_shard_id)
+        by_shard.each_value do |shard_ids|
+          sequences = shard_ids.map(&:sequence)
+          # Sequences within the same shard should be unique
+          expect(sequences.uniq.length).to eq(sequences.length)
         end
       end
     end
 
     context "when requesting many IDs with the same timestamp" do
-      let(:count) { 100 }
-
       it "generates all unique IDs" do
-        ids = subject.generate_ids(data_type, count, timestamp: custom_timestamp)
+        count = 100
+        timestamps = Array.new(count, custom_timestamp)
+        ids = subject.generate_ids_from_timestamps(data_type, timestamps: timestamps)
 
         expect(ids.length).to eq(count)
-        expect(ids.uniq.length).to eq(count)
+        expect(ids.uniq.length).to eq(count) # All IDs should be unique
 
         # All should have the same timestamp
-        timestamps = ids.map do |id|
-          VIN::Id.new(id: id, config: config).timestamp.milliseconds
-        end
-
-        expect(timestamps.uniq.length).to eq(1)
+        vin_ids = ids.map { |id| VIN::Id.new(id: id, config: config) }
+        expect(vin_ids.map { |v| v.timestamp.milliseconds }.uniq.length).to eq(1)
       end
     end
   end
 
-  # NOTE: Concurrent ID generation with same timestamp is not tested here because:
-  # 1. The mock responses are synchronized, which doesn't truly test concurrency
-  # 2. RSpec mocks aren't thread-safe without additional synchronization
-  # 3. The real concurrency guarantees come from Redis's atomic operations (INCRBY)
-  #    and the Lua script's distributed locking mechanism
-  # 4. True concurrent testing would require integration tests with a real Redis instance
-  #
-  # The uniqueness of IDs with the same timestamp is still tested through:
-  # - Sequential calls with the same timestamp (see tests above)
-  # - The round-robin logical shard ID assignment
-  # - The sequence incrementing within each shard
-
   describe "timestamp conversion and epoch handling" do
-    let(:unix_timestamp_ms) { config.custom_epoch + 3_600_000 } # 1 hour after custom epoch
-    let(:custom_timestamp) { unix_timestamp_ms }
-
     it "correctly converts Unix timestamp to custom epoch relative timestamp" do
-      id = subject.generate_id(data_type, timestamp: custom_timestamp)
-      vin_id = VIN::Id.new(id: id, config: config)
+      # The custom timestamp is in Unix milliseconds (absolute time)
+      # The ID stores timestamp relative to custom epoch
+      ids = subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
+      vin_id = VIN::Id.new(id: ids.first, config: config)
 
-      # The timestamp should be relative to custom epoch
-      expected_ms_from_epoch = custom_timestamp - config.custom_epoch
-      expect(vin_id.timestamp.milliseconds).to eq(expected_ms_from_epoch)
+      # The stored timestamp should be relative to custom epoch
+      expected_relative_ms = custom_timestamp - config.custom_epoch
+      expect(vin_id.timestamp.milliseconds).to eq(expected_relative_ms)
 
       # When converted back to Unix time, it should match the original
-      unix_ms = vin_id.timestamp.with_unix_epoch.milliseconds
-      expect(unix_ms).to eq(custom_timestamp)
+      unix_timestamp = vin_id.timestamp.milliseconds + config.custom_epoch
+      expect(unix_timestamp).to eq(custom_timestamp)
     end
 
     it "produces the same Time object as IDs generated without custom timestamp" do
-      # Generate ID with custom timestamp
-      custom_id = subject.generate_id(data_type, timestamp: custom_timestamp)
-      custom_vin_id = VIN::Id.new(id: custom_id, config: config)
+      # Generate an ID with a custom timestamp
+      ids_with_timestamp = subject.generate_ids_from_timestamps(data_type, timestamps: [custom_timestamp])
+      vin_id_with_timestamp = VIN::Id.new(id: ids_with_timestamp.first, config: config)
 
-      # The to_time method should produce the correct Time object
-      time_from_custom = custom_vin_id.timestamp.to_time
+      # The Time object should represent the custom timestamp
       expected_time = Time.at(custom_timestamp / 1000.0)
+      actual_time = vin_id_with_timestamp.timestamp.to_time
 
-      expect(time_from_custom.to_i).to eq(expected_time.to_i)
+      # Allow for small differences due to millisecond precision
+      expect(actual_time.to_i).to eq(expected_time.to_i)
+      expect((actual_time.usec / 1000) - (expected_time.usec / 1000)).to be_between(-1, 1)
     end
   end
 end

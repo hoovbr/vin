@@ -8,21 +8,25 @@ class VIN
     @config = config || VIN::Config.new
   end
 
-  def generate_id(data_type, timestamp: nil)
-    generator.generate_ids(data_type, 1, timestamp: timestamp).first
+  def generate_id(data_type)
+    generator.generate_id(data_type)
   end
 
-  def generate_ids(data_type, count, timestamp: nil)
+  def generate_ids(data_type, count)
     ids = []
     # The Lua script can't always return as many IDs as you may want. So we loop
     # until we have the exact amount.
     while ids.length < count
       initial_id_count = ids.length
-      ids += generator.generate_ids(data_type, count - ids.length, timestamp: timestamp)
+      ids += generator.generate_ids(data_type, count - ids.length)
       # Ensure the ids array keeps growing as infinite loop insurance
       return ids unless ids.length > initial_id_count
     end
     ids
+  end
+
+  def generate_ids_from_timestamps(data_type, timestamps:)
+    generator.generate_ids_from_timestamps(data_type, timestamps: timestamps)
   end
 
   private

@@ -8,20 +8,44 @@ class VIN
       @config = config
     end
 
-    def generate_ids(data_type, count = 1, timestamp: nil)
+    def generate_id(data_type)
+      validate_data_type!(data_type)
+
+      generate_single_batch(data_type, 1, nil).first
+    end
+
+    def generate_ids(data_type, count)
+      validate_data_type!(data_type)
+      validate_count!(count)
+
+      generate_single_batch(data_type, count, nil)
+    end
+
+    def generate_ids_from_timestamps(data_type, timestamps:)
+      validate_data_type!(data_type)
+      raise(ArgumentError, "timestamps must be an array") unless timestamps.is_a?(Array)
+      raise(ArgumentError, "timestamps array cannot be empty") if timestamps.empty?
+
+      timestamps.each { |ts| validate_timestamp!(ts) }
+
+      generate_ids_for_multiple_timestamps(data_type, timestamps)
+    end
+
+    private
+
+    def validate_data_type!(data_type)
       raise(ArgumentError, "data_type must be an integer") unless data_type.is_a?(Integer)
 
-      unless config.data_type_allowed_range.include?(data_type)
-        raise(ArgumentError, "data_type is outside the allowed range of #{config.data_type_allowed_range}")
-      end
+      return if config.data_type_allowed_range.include?(data_type)
+      raise(ArgumentError, "data_type is outside the allowed range of #{config.data_type_allowed_range}")
+    end
 
+    def validate_count!(count)
       raise(ArgumentError, "count must be an integer") unless count.is_a?(Integer)
       raise(ArgumentError, "count must be a positive number") if count < 1
+    end
 
-      if timestamp
-        validate_timestamp!(timestamp)
-      end
-
+    def generate_single_batch(data_type, count, timestamp)
       @data_type = data_type
       @count = count
       @custom_timestamp = timestamp
@@ -39,7 +63,54 @@ class VIN
       result
     end
 
-    private
+    def generate_ids_for_multiple_timestamps(data_type, timestamps)
+      # Group timestamps to optimize Redis calls
+      # Each unique timestamp needs only one Redis call, then we can reuse sequences
+      timestamp_groups = {}
+      timestamps.each_with_index do |ts, index|
+        timestamp_groups[ts] ||= []
+        timestamp_groups[ts] << index
+      end
+
+      # Result array to maintain order
+      results = Array.new(timestamps.length)
+
+      # Process each unique timestamp
+      timestamp_groups.each do |ts, indices|
+        needed_count = indices.length
+        ids = []
+
+        # The Lua script can't always return as many IDs as you want. So we loop
+        # until we have the exact amount.
+        while ids.length < needed_count
+          @data_type = data_type
+          @count = needed_count - ids.length
+          @custom_timestamp = ts
+
+          batch_ids = response.sequence.map do |sequence|
+            (
+              shifted_timestamp |
+              shifted_logical_shard_id |
+              shifted_data_type |
+              (sequence << config.sequence_shift)
+            )
+          end
+
+          ids += batch_ids
+          @response = nil
+
+          # Safety check to prevent infinite loops
+          break unless batch_ids.any?
+        end
+
+        # Place IDs in correct positions to maintain order
+        indices.each_with_index do |original_index, i|
+          results[original_index] = ids[i] if i < ids.length
+        end
+      end
+
+      results
+    end
 
     def shifted_timestamp
       timestamp = if custom_timestamp
