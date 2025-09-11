@@ -178,6 +178,13 @@ vin.generate_ids(data_type, count) # => [63801199693922306, 63801199693922307, �
 ```
 
 ```ruby
+# Generate IDs with custom timestamps (e.g. for back-porting legacy systems, passing your db's created_at timestamps)
+timestamps = [1646160000000, 1646160001000, 1646160002000] # Unix milliseconds
+vin.generate_ids_from_timestamps(data_type, timestamps: timestamps)
+# => [id_with_timestamp1, id_with_timestamp2, id_with_timestamp3]
+```
+
+```ruby
 id_number = vin.generate_id(data_type) # => 63801532235120742
 id = VIN::Id.new(id: id_number) # => #<VIN::Id:0x0000000108452ff0…>
 id.data_type # => 0
@@ -187,6 +194,28 @@ id.custom_timestamp # => 7605735330, time since custom epoc in milliseconds
 id.timestamp.to_time # 2023-09-27 22:16:15.33 -0300 (Ruby Time object)
 id.timestamp.epoch #=> 1688258040000, time since UNIX epoch in milliseconds
 ```
+
+## Important Limitations
+
+### Maximum IDs per Timestamp
+
+**⚠️ CRITICAL:** When using `generate_ids_from_timestamps`, you cannot generate more than `max_sequence` IDs for the same timestamp. The `max_sequence` value is determined by your `sequence_bits` configuration, e.g.:
+
+- With `sequence_bits: 11` → max 2,048 IDs per timestamp
+- With `sequence_bits: 12` → max 4,096 IDs per timestamp
+- With `sequence_bits: 10` → max 1,024 IDs per timestamp
+
+**Why this matters:** If you request more IDs than `max_sequence` for the same timestamp, the sequence counter would wrap around and start from 0 again, creating IDs with identical timestamp and sequence values. This would result in duplicate IDs.
+
+**Protection:** The `generate_ids_from_timestamps` method automatically validates this constraint and **raises an ArgumentError** if you try to exceed the limit, preventing duplicate IDs from being generated.
+
+If you are back-porting a legacy system that has more than `max_sequence` records with the same timestamp, you will need to either:
+
+1. **Recommended: Group the timestamps in batches**, ensuring that each batch has the size of `max_sequence` and when it exceeds, you increment the timestamp by 1 millisecond. Repeat this process with all timestamps again once finished, until you don't have to increment any timestamp in the entire sequence anymore.
+    - This means your VINs will not have exactly the same timestamp as the legacy IDs, but they will be very close, and you will avoid collisions. This is a good trade-off, especially when back-porting legacy systems.
+2. **Re-consider the number of sequence bits** to ensure that it fits your business needs.
+
+Note that this problem doesn't happen when generating IDs during standard usage via `generate_id` or `generate_ids` without passing timestamps as arguments, as those methods internally manage the timestamp and sequence to ensure uniqueness.
 
 # Configuration
 

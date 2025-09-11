@@ -8,21 +8,10 @@ describe VIN do
 
   describe ".generate_id" do
     let(:id) { dummy_id }
-    let(:ids) { [id] }
 
     it "generates one ID" do
-      allow(generator).to(receive(:generate_ids).and_return(ids))
+      allow(generator).to(receive(:generate_id).and_return(id))
       expect(subject.generate_id(data_type)).to(eql(id))
-    end
-
-    context "with custom timestamp" do
-      let(:custom_timestamp) { 1_646_160_000_000 + 86_400_000 } # 1 day after custom epoch
-
-      it "passes timestamp to generator" do
-        allow(generator).to receive(:generate_ids).with(data_type, 1, timestamp: custom_timestamp).and_return(ids)
-        subject.generate_id(data_type, timestamp: custom_timestamp)
-        expect(generator).to have_received(:generate_ids).with(data_type, 1, timestamp: custom_timestamp)
-      end
     end
   end
 
@@ -45,33 +34,26 @@ describe VIN do
         expect(subject.generate_ids(data_type, count)).to(eql(ids))
       end
     end
+  end
 
-    context "with custom timestamp" do
-      let(:custom_timestamp) { 1_646_160_000_000 + 86_400_000 } # 1 day after custom epoch
-      let(:count) { 3 }
+  describe ".generate_ids_from_timestamps" do
+    let(:one_day_after_epoch) { 1_646_160_000_000 + 86_400_000 } # 1 day after custom epoch
+    let(:two_days_after_epoch) { 1_646_160_000_000 + 172_800_000 } # 2 days after custom epoch
+    let(:three_days_after_epoch) { 1_646_160_000_000 + 259_200_000 } # 3 days after custom epoch
+    let(:timestamps) { [one_day_after_epoch, two_days_after_epoch, three_days_after_epoch] }
+    let(:ids) { timestamps.map { dummy_id } }
 
-      it "passes timestamp to generator" do
-        allow(generator).to receive(:generate_ids).with(data_type, count, timestamp: custom_timestamp).and_return(ids)
-        subject.generate_ids(data_type, count, timestamp: custom_timestamp)
-        expect(generator).to have_received(:generate_ids).with(data_type, count, timestamp: custom_timestamp)
-      end
+    it "generates IDs for each timestamp" do
+      allow(generator).to receive(:generate_ids_from_timestamps).with(data_type, timestamps: timestamps).and_return(ids)
+      result = subject.generate_ids_from_timestamps(data_type, timestamps: timestamps)
+      expect(result).to eql(ids)
+      expect(result.length).to eq(timestamps.length)
+    end
 
-      it "passes timestamp on subsequent calls when more IDs are needed" do
-        small_batch = [dummy_id]
-        allow(generator).to receive(:generate_ids)
-          .with(data_type, count, timestamp: custom_timestamp)
-          .and_return(small_batch)
-        allow(generator).to receive(:generate_ids)
-          .with(data_type, count - small_batch.length, timestamp: custom_timestamp)
-          .and_return(ids[0...(count - small_batch.length)])
-
-        result = subject.generate_ids(data_type, count, timestamp: custom_timestamp)
-        expect(result.length).to eq(count)
-        expect(generator).to have_received(:generate_ids)
-          .with(data_type, count, timestamp: custom_timestamp)
-        expect(generator).to have_received(:generate_ids)
-          .with(data_type, count - small_batch.length, timestamp: custom_timestamp)
-      end
+    it "passes timestamps to generator" do
+      allow(generator).to receive(:generate_ids_from_timestamps).with(data_type, timestamps: timestamps).and_return(ids)
+      subject.generate_ids_from_timestamps(data_type, timestamps: timestamps)
+      expect(generator).to have_received(:generate_ids_from_timestamps).with(data_type, timestamps: timestamps)
     end
   end
 end

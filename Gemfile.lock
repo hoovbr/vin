@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hoov_vin (1.0.0)
+    hoov_vin (2.0.0)
       redis (~> 5)
 
 GEM
